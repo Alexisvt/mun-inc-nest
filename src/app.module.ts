@@ -1,29 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MunModule } from './mun/mun.module';
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`],
-    }),
-    MongooseModule.forRootAsync({
-      imports: [
-        ConfigModule.forRoot({
-          envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`],
-        }),
-      ],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_CONNECTION'),
-      }),
-      inject: [ConfigService],
-    }),
-    MunModule,
-  ],
+  imports: [MongooseModule.forRoot(process.env.MONGO_CONNECTION), MunModule],
   controllers: [AppController],
   providers: [AppService],
 })
